@@ -32,13 +32,12 @@ enum enMainMenuePermissions {
 	pUpdateClients = 8, pFindClient = 16, pTranactions = 32,
 	pManageUsers = 64
 };
-
+void Login();
 stClient ReadClientInfo();
 string ReadAccountNumber();
 double ReadBalance();
 string ConvertClientInfoInOneLine(stClient client, string delmiter = "#//#");
 void AddDataLineInfoToFile(string fileName, string line);
-//
 vector<string> Split(string line, string delmiter = "#//#");
 stClient SaveClientInfoToStructer(string line);
 vector<stClient> LoadClientDataFromFileToVector(string fileName);
@@ -61,14 +60,10 @@ void PrintAllClientsDataScreen(vector<stClient> vClients);
 void PrintAllData();
 void TotalBalnce(vector<stClient> vClients);
 void PrintClientBalnceCard(stClient Client);
-
-
 void MainMenue();
 void MainMenueCoice(enChose choice);
 short ReadMainMenueOption();
 void GoBackToMainMenue();
-
-
 bool Depostie(string AccNum, vector<stClient>& v);
 bool Withdraw(string AccNum, vector<stClient>& v);
 void DepostieScreen();
@@ -78,8 +73,6 @@ void GoBackToTransactionMenue();
 void PrintAllBalanceInfo();
 void TransactionCoice(enExtensions choice);
 void TransactionMenu();
-
-
 void UserMenue();
 short ReadUserMenueOption();
 string ReadUserName();
@@ -106,7 +99,13 @@ stUser UpdateInUserInfo(string UserName);
 bool UpdateUserInfo(string UserName, vector<stUser>& v);
 void UpdateUserScreen();
 void UserMenueCoice(enUserOptions choice);
-
+bool CheckAccessPermission(enMainMenuePermissions Permission);
+void ShowAccessDeniedMessage()
+{
+	cout << "\n------------------------------------\n";
+	cout << "Access Denied, \nYou dont Have Permission To Do this, \nPlease Conact Your Admin.";
+		cout << "\n------------------------------------\n";
+}
 stClient ReadClientInfo() 
 {
 	stClient client;
@@ -132,7 +131,6 @@ string ReadAccountNumber()
 	return AccountNum;
 
 }
-
 double ReadBalance() 
 {
 	double balance;
@@ -369,6 +367,12 @@ bool UpdateClientInfoByAccNum(string AccNum, vector <stClient> &v)
 }
 void AddScreen()
 {
+	if
+		(!CheckAccessPermission(enMainMenuePermissions::pAddNewClient))
+	{
+		ShowAccessDeniedMessage();
+		return;
+	}
 	cout << "\n-----------------------------------\n";
 	cout << "\tAdd Client Screen";
 	cout << "\n-----------------------------------\n";
@@ -378,6 +382,13 @@ void AddScreen()
 }
 void DeleteScreen()
 {
+	if
+		(!CheckAccessPermission(enMainMenuePermissions::pDeleteClient))
+	{
+		ShowAccessDeniedMessage();
+		return;
+	}
+
 	cout << "\n-----------------------------------\n";
 	cout << "\tDelete Client Screen";
 	cout << "\n-----------------------------------\n";
@@ -399,6 +410,13 @@ void DeleteScreen()
 }
 void UpdateScreen()
 {
+	if
+		(!CheckAccessPermission(enMainMenuePermissions::pUpdateClients))
+	{
+		ShowAccessDeniedMessage();
+		return;
+	}
+
 	cout << "\n-----------------------------------\n";
 	cout << "\tUpdate Client Screen";
 	cout << "\n-----------------------------------\n";
@@ -420,6 +438,13 @@ void UpdateScreen()
 }
 void FindScreen()
 {
+
+	if
+		(!CheckAccessPermission(enMainMenuePermissions::pFindClient))
+	{
+		ShowAccessDeniedMessage();
+		return;
+	}
 	cout << "\n-----------------------------------\n";
 	cout << "\tFind Client Screen";
 	cout << "\n-----------------------------------\n";
@@ -465,8 +490,9 @@ void MainMenueCoice(enChose choice)
 	case enChose::Exit:
 	{
 		system("cls");
-		ShowEndScreen();
-		exit(0);
+		//ShowEndScreen();
+		Login();
+		//exit(0);
 	}
 	case enChose::Update:
 	{
@@ -486,12 +512,14 @@ void MainMenueCoice(enChose choice)
 	{
 		system("cls");
 		TransactionMenu();
+		GoBackToMainMenue();
 		break;
 	}
 	case enChose::MangeUsers:
 	{
 		system("cls");
 		UserMenue();
+		GoBackToMainMenue();
 		break;
 	}
 
@@ -513,8 +541,25 @@ void PrintClientRecord(stClient Client)
 	cout << "| " << setw(12) << left << Client.phone;
 	cout << "| " << setw(12) << left << Client.AccountBalance;
 }
+bool CheckAccessPermission(enMainMenuePermissions Permission) 
+{
+	if (CurrentUser.permission == enMainMenuePermissions::eAll)
+		return true;
+	if ((Permission & CurrentUser.permission) == Permission)
+		return true;
+	else
+		return false;
+}
 void PrintAllClientsDataScreen(vector <stClient> vClients)
 {
+
+	if
+		(!CheckAccessPermission(enMainMenuePermissions::pListClients))
+	{
+		ShowAccessDeniedMessage();
+		return;
+	}
+
 	cout << "\n\t\t\t\t\tClient List (" << static_cast<int>(vClients.size()) << ")Client(s).";
 	cout <<
 		"\n_______________________________________________________";
@@ -560,7 +605,7 @@ void MainMenue()
 	cout << "\t[5] Find Client.\n";
 	cout << "\t[6] Transaction.\n";
 	cout << "\t[7] Mange Users.\n";
-	cout << "\t[8] Exit.\n";
+	cout << "\t[8] LogOut.\n";
 	cout << "===========================================\n";
 
 	cout << "chose what do you want to do \n";
@@ -755,6 +800,13 @@ void TransactionCoice(enExtensions choice)
 }
 void TransactionMenu() 
 {
+	if
+		(!CheckAccessPermission(enMainMenuePermissions::pTranactions))
+	{
+		ShowAccessDeniedMessage();
+		return;
+	}
+
 	system("cls");
 	cout << "===========================================\n";
 	cout << "\t\tMain Menue Screen\n";
@@ -799,7 +851,6 @@ void TotalBalnce(vector <stClient> vClients)
 	cout << "_________________________________________\n" << endl;
 
 }
-
 short ReadUserMenueOption()
 {
 	cout << "Choose what do you want to do? [1 to 6]? ";
@@ -817,6 +868,13 @@ string ReadUserName()
 }
 void UserMenue()
 {
+	if
+		(!CheckAccessPermission(enMainMenuePermissions::pManageUsers))
+	{
+		ShowAccessDeniedMessage();
+		return;
+	}
+
 	system("cls");
 	cout << "===========================================\n";
 	cout << "\t\tMange Users Menue Screen\n";
